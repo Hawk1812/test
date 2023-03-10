@@ -35,3 +35,25 @@ jobs:
 
       - name: Upload code coverage
         uses: codecov/codecov-action@v3
+        
+      - name: Install and set up RevoluteBot
+        uses: revolut-engineering/revolutebot@v1.2.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run GitHub Security Code Scanning
+        uses: github/codeql-action/analyze@v1
+        with:
+          languages: java
+          sarif_file: ./codeql_results.sarif
+
+      - name: Check for vulnerabilities from CodeQL or RevoluteBot
+        run: |
+          error_msg=""
+          if [ -f ./codeql_results.sarif ] && grep -q '\"ruleId\": \"Security/\"' ./codeql_results.sarif; then
+            error_msg="Security vulnerabilities detected by CodeQL.\n"
+            codeql_output=$(cat ./codeql_results.sarif | jq '.runs[].results[] | select(.rule.id | startswith("Security/")) | "\(.rule.id): \(.message)"')
+            error_msg="$error_msg$codeql_output\n"
+          fi
+          if [ -f ./revolutebot_issues.txt ]; then
+            error_msg="$error_msg Outdated or vulnerable dependencies detected by Revolute
