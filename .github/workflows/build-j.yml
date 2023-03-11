@@ -29,18 +29,6 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v2
 
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          java-version: ${{ inputs.java-version }}
-          distribution: ${{ inputs.java-distribution }}
-          cache: 'maven'
-
-      - name: Install and set up RevoluteBot
-        uses: revolut-engineering/revolutebot@v1.2.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Run GitHub Security Code Scanning
         uses: github/codeql-action/analyze@v1
         with:
